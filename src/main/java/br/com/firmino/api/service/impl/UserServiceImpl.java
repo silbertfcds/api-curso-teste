@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.firmino.api.domain.User;
 import br.com.firmino.api.domain.dto.UserDTO;
+import br.com.firmino.api.exception.DataIntegratyViolationException;
 import br.com.firmino.api.exception.ObjectNotFoundException;
 import br.com.firmino.api.repository.UserRepository;
 import br.com.firmino.api.service.UserService;
@@ -34,7 +35,14 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	public User create(UserDTO obj) {
+		findByEmail(obj);
 		return repository.save(mapper.map(obj, User.class));
 	}
 
+	private void findByEmail(UserDTO obj) {
+		Optional<User> userOptional = repository.findByEmail(obj.getEmail());
+		if(userOptional.isPresent()) {
+			throw new DataIntegratyViolationException("Email já cadastrado");
+		}
+	}
 }
